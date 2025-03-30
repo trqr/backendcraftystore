@@ -2,6 +2,7 @@ package com.beboustore.demo.controllers;
 
 import com.beboustore.demo.models.User;
 import com.beboustore.demo.services.UserService;
+import com.beboustore.demo.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
 
     @PostMapping("/submit-user-data")
@@ -24,13 +27,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginCheck(@RequestBody Map<String, String> body) {
+    public String loginCheck(@RequestBody Map<String, String> body) {
         String userName = body.get("userName");
         String userPassword = body.get("userPassword");
 
         if (userService.loginCheck(userName, userPassword)){
-            return ResponseEntity.ok("authentification réussie");
+            return jwtUtil.generateToken(userName);
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentification échouée");
+        return "Authentification échouée";
     }
 }
