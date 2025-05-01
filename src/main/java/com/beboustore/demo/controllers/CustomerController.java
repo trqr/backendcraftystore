@@ -2,6 +2,7 @@ package com.beboustore.demo.controllers;
 
 import com.beboustore.demo.models.Customer;
 import com.beboustore.demo.repositories.CustomerRepository;
+import com.beboustore.demo.services.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,20 @@ import java.util.List;
 public class CustomerController {
     @Autowired
     private CustomerRepository customerRepository;
+    @Autowired
+    private CustomerService customerService;
 
 
     @PostMapping("/submit-customer-data")
     public ResponseEntity<Customer> submitCustomerData(@RequestBody Customer customer) {
+        Customer existingCustomer = customerService.isAlreadyACustomer(customer);
 
-        Customer savedCustomer = customerRepository.save(customer);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedCustomer);
+        if (existingCustomer != null){
+            existingCustomer.setNumberOfOrders(existingCustomer.getNumberOfOrders()+1);
+            customerRepository.save(existingCustomer);
+            return ResponseEntity.ok(existingCustomer);
+        } else {
+            return ResponseEntity.status(HttpStatus.CREATED).body(customerService.saveCustomer(customer));
+        }
     }
 }

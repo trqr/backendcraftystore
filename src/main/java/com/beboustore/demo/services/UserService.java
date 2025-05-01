@@ -22,21 +22,19 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    public boolean isUserAlreadyRegistered(User user){
+        return userRepository.findByUserEmail(user.getUserEmail()) != null;
+    }
+
     public void registerUser(User user){
         String encryptedPassword = passwordEncoder.encode(user.getUserPassword());
         user.setUserPassword(encryptedPassword);
         userRepository.save(user);
     }
 
-    public User getUserByUserName(String userName) {
-        return userRepository.findByUserName(userName);
-    }
+    public boolean loginCheck(String userEmail, String password){
 
-
-    public boolean loginCheck(String user, String password){
-
-        User loginUser = userRepository.findByUserName(user);
+        User loginUser = userRepository.findByUserEmail(userEmail);
         return passwordEncoder.matches(password, loginUser.getUserPassword());
     }
-
 }

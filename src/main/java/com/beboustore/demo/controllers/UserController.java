@@ -1,6 +1,10 @@
 package com.beboustore.demo.controllers;
 
+import com.beboustore.demo.models.Customer;
 import com.beboustore.demo.models.User;
+import com.beboustore.demo.repositories.CustomerRepository;
+import com.beboustore.demo.repositories.OrderRepository;
+import com.beboustore.demo.repositories.UserRepository;
 import com.beboustore.demo.services.UserService;
 import com.beboustore.demo.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,22 +22,44 @@ public class UserController {
     private UserService userService;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
 
     @PostMapping("/submit-user-data")
-    public ResponseEntity<String> submitUserData(@RequestBody User user) {
-        userService.registerUser(user);
-        return ResponseEntity.ok("utilisateur sauvegardé");
+    public String submitUserData(@RequestBody User user) {
+        if (userService.isUserAlreadyRegistered(user)) {
+            return "Email déja utilisé";
+        } else {
+            userService.registerUser(user);
+            return "Utilisateur sauvegardé";
+        }
     }
 
     @PostMapping("/login")
     public String loginCheck(@RequestBody Map<String, String> body) {
-        String userName = body.get("userName");
+        String userEmail = body.get("userEmail");
         String userPassword = body.get("userPassword");
 
-        if (userService.loginCheck(userName, userPassword)){
-            return jwtUtil.generateToken(userName);
+        if (userService.loginCheck(userEmail, userPassword)){
+            return jwtUtil.generateToken(userEmail);
         }
         return "Authentification échouée";
+    }
+
+    @GetMapping("/userorders")
+    public ResponseEntity<?> getUserOrders(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String jwt = authHeader.substring(7);
+            System.out.println("Token : " + jwt);
+        }
+        String jwt = authHeader.substring(7);
+        String userEmail = jwtUtil.extractUsername(jwt);
+        Customer customer = customerRepository.findByCustomerMail(userEmail);
+        return ResponseEntity.ok(orderRepository.findByCustomer(customer));
     }
 }

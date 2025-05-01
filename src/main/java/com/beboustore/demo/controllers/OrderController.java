@@ -24,8 +24,8 @@ public class OrderController {
     }
 
     @PostMapping("/create-order")
-    public ResponseEntity<String> createOrder(@RequestBody Order order) {
-        orderService.createOrder(order);
+    public ResponseEntity<String> createOrderAndSaveCustomer(@RequestBody Order order) {
+        orderService.createOrderAndSaveCustomer(order);
         return ResponseEntity.ok("commande ajoutée");
     }
 }

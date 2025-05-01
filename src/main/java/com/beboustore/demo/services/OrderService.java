@@ -20,11 +20,14 @@ public class OrderService {
     private CustomerRepository customerRepository;
     @Autowired
     private OrderDetailsRepository orderDetailsRepository;
+    @Autowired
+    private CustomerService customerService;
 
 
 
-    public void createOrder(Order order){
-        Customer savedCustomer = customerRepository.save(order.getCustomer());
+    public void createOrderAndSaveCustomer(Order order){
+        Customer customerInfo = order.getCustomer();
+        Customer savedCustomer = customerService.OrderCustomer(customerInfo);
         saveOrderDetails(order.getCart(), order);
         orderRepository.save(order.setCustomer(savedCustomer));
     }
