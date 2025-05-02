@@ -16,7 +16,7 @@ public class OrderDetails {
     @ManyToOne
     @JoinColumn(name= "product_id")
     private Product product;
-    private Integer productPrice;
+    private double productPrice;
     private Integer quantity;
     @ManyToOne
     @JoinColumn(name= "order_id")

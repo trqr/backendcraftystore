@@ -35,6 +35,7 @@ public class UserController {
         if (userService.isUserAlreadyRegistered(user)) {
             return "Email déja utilisé";
         } else {
+            user.setUserFidelityPoints((userService.getUserTotalPurchase(user)*10));
             userService.registerUser(user);
             return "Utilisateur sauvegardé";
         }
@@ -61,5 +62,17 @@ public class UserController {
         String userEmail = jwtUtil.extractUsername(jwt);
         Customer customer = customerRepository.findByCustomerMail(userEmail);
         return ResponseEntity.ok(orderRepository.findByCustomer(customer));
+    }
+
+    @GetMapping("/get-user-info")
+    public User getUserInfo(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String jwt = authHeader.substring(7);
+            return userService.GetUserInfo(jwt);
+        }
+        else {
+            return null;
+        }
+
     }
 }
